@@ -10,8 +10,8 @@ http://hsglib.com Domain Open Source
 
 현재 서버에 설치된 버전은 다음과 같습니다.
 
-nodejs - v0.10.22
-socket.io - v1.2.1
-express - v4.10.7
+nodejs - v0.10.22 <br />
+socket.io - v1.2.1 <br />
+express - v4.10.7 <br />
 
 입니다.
