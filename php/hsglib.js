@@ -15,12 +15,12 @@ var express = require('express'),
 	
 server.listen(50);
 
-app.use("/js", express.static( '/home/hsg/php/js '));
-app.use("/css", express.static( '/home/hsg/php/css' ));
-app.use("/img", express.static( '/home/hsg/php/img' ));
+app.use("/js", express.static( __dirname+'/js '));
+app.use("/css", express.static( __dirname+'/css' ));
+app.use("/img", express.static( __dirname+'/img' ));
 
 app.get(/.*/, function(req, res){
-	res.sendfile( '/home/hsg/php/index.html' );
+	res.sendfile( __dirname+'/index.html' );
 });
 
 function gameReset() {
