@@ -76,122 +76,234 @@
 			timer = setTimeout(callback, ms);
 		};
 	})();
-	
-	
+
+	var publicLayer = {
+		'useLayer': false,
+		'o': '_layer_',
+		'v': '_layerOveray_',
+		'w': $(window).width()*0.8,
+		'h': $(window).height()*0.8,
+		'reset': function(){
+			$("._layers_").remove();
+
+			this.useLayer = false;
+			this.w = $(window).width()*0.8;
+			this.h = $(window).width()*0.8;
+			this.o = '_layer_';
+			this.v = '_layerOveray_';
+
+		},
+		'resize': function(){
+			if( this.useLayer ) {
+				$('.'+this.o).css({
+					'top' :  ( $(window).scrollTop() + ($(window).height() - parseInt(this.h)) / 2 )+'px',
+					'left' :  ( $(window).width() / 2 ) - ( parseInt(this.w) / 2 ) +'px'
+				});
+
+				$('.'+this.v).css({
+					'width': $(document).width()+'px',
+					'height': $(document).height()+'px'
+				});
+			}
+		},
+		'setCss': function(options){
+			if( options )
+				$('.'+this.o).css(options);
+		},
+		'setHtml': function(addHtml){
+			$('body').append( '<div class="'+ this.o +' _layers_"></div>' );
+			$('body').append( '<div class="'+ this.v +' _layers_"></div>' );
+
+			$('.'+this.v).css({
+				'width': $(document).width()+'px',
+				'height': $(document).height()+'px',
+				'position': 'absolute',
+				'top': '0',
+				'left': '0',
+				'z-index': '1004',
+				'filter': 'alpha(opacity=50)',
+				'-khtml-opacity': '0.5',
+				'-moz-opacity': '0.5',
+				'opacity': '0.5',
+				'background-color': '#000',
+				'display': 'none'
+			});
+
+			$('.'+this.o).css({
+				'top': ( $(window).scrollTop() + ($(window).height() - this.h) / 2 )+'px',
+				'left': ( $(window).width() / 2 ) - ( this.w / 2 )+'px',
+				'width': this.w,
+				'height': this.h,
+				'position': 'absolute',
+				'padding': '0px',
+				'background-color': '#fff',
+				'border-radius': '10px',
+				'-moz-border-radius': '10px',
+				'-webkit-border-radius': '10px',
+				'overflow-y': 'auto',
+				'cursor': 'default',
+				'z-index': '1005',
+				'display': 'none'
+			});
+
+			$('.'+this.o).html(addHtml);
+		},
+		'setSize': function(w, h){
+			this.w = w || $(window).width()*0.8;
+			this.h = h || $(window).height()*0.8;
+		},
+		'init': function(){
+			this.useLayer = true;
+			$('._layers_').show();
+
+			$(window).resize(function(){ publicLayer.resize(); });
+			$(window).scroll(function(){ publicLayer.resize(); });
+			$(document).on('click touchstart', '.'+this.v, function(){ publicLayer.reset(); });
+		}
+	};
+
+	var queryString = {
+		'setArr' : [],
+		'init': function(){
+			var URI = location.href.split("?");
+			if(URI.length > 1){
+				URI = URI[1].split("&");
+				for(var i in URI)
+					if(URI[i])
+						this.setArr[this.setArr.length] = { key: URI[i].split("=")[0], value: URI[i].split("=")[1] };
+			}
+		},
+		'getParam': function(getKey){
+			var getValue = null;
+			if(this.setArr.length > 0){
+				for(var i in this.setArr)
+					if(this.setArr[i].key == getKey)
+						getValue = this.setArr[i].value;
+			}
+
+			return getValue;
+		}
+	};
+
+
+	var htmlspecialchars = function (string, quote_style, charset, double_encode) {
+		var optTemp = 0, i = 0, noquotes = false;
+		if (typeof quote_style === 'undefined' || quote_style === null) {
+			quote_style = 2;
+		}
+		string = string.toString();
+		if (double_encode !== false) {
+			// Put this first to avoid double-encoding
+			string = string.replace(/&/g, '&amp;');
+		}
+		string = string.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+		var OPTS = {
+			'ENT_NOQUOTES' : 0,
+			'ENT_HTML_QUOTE_SINGLE' : 1,
+			'ENT_HTML_QUOTE_DOUBLE' : 2,
+			'ENT_COMPAT' : 2,
+			'ENT_QUOTES' : 3,
+			'ENT_IGNORE' : 4
+		};
+		if (quote_style === 0) {
+			noquotes = true;
+		}
+		if (typeof quote_style !== 'number') {
+			// Allow for a single string or an array of string flags
+			quote_style = [].concat(quote_style);
+			for (i = 0; i < quote_style.length; i++) {
+				// Resolve string input to bitwise e.g. 'ENT_IGNORE' becomes 4
+				if (OPTS[quote_style[i]] === 0) {
+					noquotes = true;
+				} else if (OPTS[quote_style[i]]) {
+					optTemp = optTemp | OPTS[quote_style[i]];
+				}
+			}
+			quote_style = optTemp;
+		}
+		if (quote_style & OPTS.ENT_HTML_QUOTE_SINGLE) {
+			string = string.replace(/'/g, '&#039;');
+		}
+		if (!noquotes) {
+			string = string.replace(/"/g, '&quot;');
+		}
+
+		return string;
+	};
+
+
+
+	var dashBoardScroll = function(){
+		//var _height = parseInt($('.dashBoardText li').length);
+		/*$('.dashBoardText').animate({
+		 scrollTop: $(".dashBoardText")[0].scrollHeight
+		 }, 'fast');*/
+		$('.dashBoardText').scrollTop($(".dashBoardText")[0].scrollHeight);
+	};
+
+	var showMessage = function(text, type, icon){
+		if( !icon ) icon = '/img/green_c.png';
+		var div = '<div class="checkMsgSwap">';
+				div += '<div class="checkMsg"><img src="'+icon+'" class="width_24" alt="checkBox" />'+decodeURIComponent(text)+'</div>';
+			div += '</div>';
+		$('.checkMsgSwap').remove();
+		$('body').append(div);
+		if( type == true )
+			removeMessage( $('.checkMsgSwap') );
+	};
+
+	var removeMessage = function(o){
+		delay(function(){
+			o.fadeOut("slow", function(){
+				o.remove();
+			});
+		}, 2500);
+	};
+
+	var layerCenter = function(w, h, o, v){
+		if( $("._layerOveray_").length < 1 && $('.gameJoinCheckDiv').length == '0' )
+			$('body').append( '<div class="_layerOveray_"></div>' );
+
+		var width = $(window).width() <= 400 ? 250 : w || $(window).width()*0.8;
+		var height = $(window).width() <= 400 ? parseInt(h)+40 : h || $(window).height()*0.8;
+
+		var layer = o || $('._layer_');
+		var overay = v || $('._layerOveray_');
+
+		var top = ( $(window).scrollTop() + ($(window).height() - height) / 2 );
+		var left = ($(window).width()/2) - (width/2);
+
+		overay.css({
+			width: $(document).width()+'px',
+			height: $(document).height()+'px'
+		});
+
+		layer.css({
+			top: top,
+			left: $(window).width() <= 400 ? parseInt(left)-10 : left,
+			width: width,
+			height: height
+		});
+	};
+
+	var layerNotice = function(msg){
+		$('._layer_,._layerOveray_').remove();
+		var div = '<div class="_layer_">';
+				div += '<div class="gameJoinCheckDiv">'+msg+'</div>';
+			div += '</div>';
+		$('body').append(div);
+	};
+
 	$(function(){
+		queryString.init();
 		/*window.onbeforeunload = function (e) { 
 			e = e || window.event; 
 			if (e) 
 				e.returnValue = '현재 페이지를 벗어 나시겠습니까?'; 
 			return '현재 페이지를 벗어 나시겠습니까?'; 
 		};*/
-		
-		var htmlspecialchars = function (string, quote_style, charset, double_encode) {
-			var optTemp = 0, i = 0, noquotes = false;
-			if (typeof quote_style === 'undefined' || quote_style === null) {
-				quote_style = 2;
-			}
-			string = string.toString();
-			if (double_encode !== false) {
-				// Put this first to avoid double-encoding
-				string = string.replace(/&/g, '&amp;');
-			}
-			string = string.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-			var OPTS = {
-				'ENT_NOQUOTES' : 0,
-				'ENT_HTML_QUOTE_SINGLE' : 1,
-				'ENT_HTML_QUOTE_DOUBLE' : 2,
-				'ENT_COMPAT' : 2,
-				'ENT_QUOTES' : 3,
-				'ENT_IGNORE' : 4
-			};
-			if (quote_style === 0) {
-				noquotes = true;
-			}
-			if (typeof quote_style !== 'number') {
-				// Allow for a single string or an array of string flags
-				quote_style = [].concat(quote_style);
-				for (i = 0; i < quote_style.length; i++) {
-					// Resolve string input to bitwise e.g. 'ENT_IGNORE' becomes 4
-					if (OPTS[quote_style[i]] === 0) {
-						noquotes = true;
-					} else if (OPTS[quote_style[i]]) {
-						optTemp = optTemp | OPTS[quote_style[i]];
-					}
-				}
-				quote_style = optTemp;
-			}
-			if (quote_style & OPTS.ENT_HTML_QUOTE_SINGLE) {
-				string = string.replace(/'/g, '&#039;');
-			}
-			if (!noquotes) {
-				string = string.replace(/"/g, '&quot;');
-			}
-
-			return string;
-		}		
-		
-		var dashBoardScroll = function(){
-			//var _height = parseInt($('.dashBoardText li').length);
-			/*$('.dashBoardText').animate({
-				scrollTop: $(".dashBoardText")[0].scrollHeight
-			}, 'fast');*/					
-			$('.dashBoardText').scrollTop($(".dashBoardText")[0].scrollHeight);
-		};
-		
-		var showMessage = function(text, type, icon){
-			if( !icon ) icon = '/img/green_c.png';
-			var div = '<div class="checkMsgSwap">';
-					div += '<div class="checkMsg"><img src="'+icon+'" class="width_24" alt="checkBox" />'+decodeURIComponent(text)+'</div>';
-				div += '</div>';
-			$('.checkMsgSwap').remove();
-			$('body').append(div);
-			if( type == true ) 
-				removeMessage( $('.checkMsgSwap') );
-		};
-		
-		var removeMessage = function(o){
-			delay(function(){
-				o.fadeOut("slow", function(){
-					o.remove();
-				});
-			}, 2500);
-		};
-		
-		var layerCenter = function(w, h, o, v){
-			if( $("._layerOveray_").length < 1 && $('.gameJoinCheckDiv').length == '0' ) 
-				$('body').append( '<div class="_layerOveray_"></div>' );
-			
-			var width = $(window).width() <= 400 ? 250 : w || $(window).width()*0.8;
-			var height = $(window).width() <= 400 ? parseInt(h)+40 : h || $(window).height()*0.8;
-			
-			var layer = o || $('._layer_');
-			var overay = v || $('._layerOveray_');
-			
-			var top = ( $(window).scrollTop() + ($(window).height() - height) / 2 );
-			var left = ($(window).width()/2) - (width/2);
-			
-			overay.css({
-				width: $(document).width()+'px',
-				height: $(document).height()+'px'
-			});
-			
-			layer.css({
-				top: top,
-				left: $(window).width() <= 400 ? parseInt(left)-10 : left,
-				width: width,
-				height: height
-			});	
-		}
-		
-		var layerNotice = function(msg){ 
-			$('._layer_,._layerOveray_').remove();
-			var div = '<div class="_layer_">';
-					div += '<div class="gameJoinCheckDiv">'+msg+'</div>';
-				div += '</div>';
-			$('body').append(div);			
-		};
 		
 		$(window).resize(function(){
 			if( $('._layer_').length > 0 ) 
