@@ -1,6 +1,6 @@
 (function($){
 	"use strict";
-	var socket = io.connect(location.protocol +"//"+ location.hostname +":8080");
+	var socket = io.connect(location.protocol +"//"+ location.hostname +":"+ location.port);
 	var me = null, pageMove = true, joinCheck = false;
 	window.onunload = function(){ socket.disconnect(); };
 	
