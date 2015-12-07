@@ -1,6 +1,6 @@
 (function($){
 	"use strict";
-	var socket = io.connect("http://localhost:50");
+	var socket = io.connect("//"+ location.hostname +":8080");
 	var me = null, pageMove = true, joinCheck = false;
 	window.onunload = function(){ socket.disconnect(); };
 	

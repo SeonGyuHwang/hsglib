@@ -13,7 +13,7 @@ var express = require('express'),
 	nunchiUserObj = {},
 	joinUsers = {};
 	
-server.listen(50);
+server.listen(8080);
 
 app.use("/js", express.static( __dirname+'/js' ));
 app.use("/css", express.static( __dirname+'/css' ));
